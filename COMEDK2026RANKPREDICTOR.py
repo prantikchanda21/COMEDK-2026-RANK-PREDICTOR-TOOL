@@ -23,16 +23,18 @@ table_9s1 = {
     (50, 59): (37000, 57000)
 }
 
+# PRECISE RECALIBRATION: 9S2 is "Slightly Tougher" than 9S1. 
+# Yields slightly better ranks than 9S1 for the same marks, removing the extreme "hopium" jumps.
 table_9s2 = {
-    (130, 180): (1, 100),
-    (120, 129): (100, 350),
-    (110, 119): (350, 1800),
-    (100, 109): (1800, 3500),
-    (90, 99): (3500, 6000),
-    (80, 89): (6000, 12000),
-    (70, 79): (12000, 19000),
-    (60, 69): (19000, 35000),
-    (50, 59): (35000, 55000)
+    (130, 180): (1, 120),
+    (120, 129): (120, 650),
+    (110, 119): (650, 2200),
+    (100, 109): (2200, 4200),
+    (90, 99): (4200, 8800),
+    (80, 89): (8800, 13000),
+    (70, 79): (13000, 20000),
+    (60, 69): (20000, 34000),
+    (50, 59): (34000, 54000)
 }
 
 # --- Core Logic ---
@@ -41,6 +43,8 @@ def get_base_rank_bounds(marks, shift):
     for (min_m, max_m), (min_r, max_r) in active_table.items():
         if min_m <= marks <= max_m:
             return min_r, max_r, min_m, max_m
+            
+    # Adjusted fallback for lower scores
     return 57000, 110000, 0, 49
 
 def calculate_projected_rank(marks, shift, scenario):
@@ -91,8 +95,8 @@ with st.container(border=True):
     with col2:
         marks = st.number_input(f"Raw Score (Max 180):", min_value=0, max_value=180, value=90, step=1)
     
-    # Mathematical contribution logic replacing progress bar
-    shift_avg = 93.1 if "9S1" in shift else 92.1
+    # Mathematical contribution logic
+    shift_avg = 93.1 if "9S1" in shift else 91.5 # Adjusted 9S2 average to reflect the slight difficulty increase
     deviation = round(marks - shift_avg, 1)
     
     st.markdown("<br>", unsafe_allow_html=True)
@@ -131,6 +135,9 @@ if st.button("Initialize Prediction ⚡", type="primary", use_container_width=Tr
             st.info("🎯 **Target Acquired:** Absolute Maximum Bracket Reached.")
         else:
             st.info(f"📍 **Bracket Constraint:** The algorithm bounds this score strictly between Rank **{min_r:,}** and **{max_r:,}**.")
+            
+        if "9S2" in shift:
+            st.caption("⚖️ *Note: 9S2 brackets are normalized to reflect a slightly higher exam difficulty compared to 9S1.*")
 
 st.divider()
 st.markdown("<p style='text-align: center; font-size: 12px; color: gray;'>Developed with Statistical Distribution | Advanced statistical tie-breaker modeling enabled</p>", unsafe_allow_html=True)
