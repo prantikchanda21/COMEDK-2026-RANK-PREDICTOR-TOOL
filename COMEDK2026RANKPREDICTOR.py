@@ -10,66 +10,98 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- Custom CSS for Neon Grid & RGB Lighting ---
-neon_css = """
+# --- ROBUST CUSTOM CSS FOR NEON RGB FLICKERING GRID ---
+cyberpunk_bg = """
+<div class="neon-grid-bg"></div>
+
 <style>
-    /* Darken the main app background */
-    [data-testid="stAppViewContainer"], .stApp {
-        background-color: #050505 !important;
-        color: #ffffff !important;
-    }
-    
-    /* Create the animated Neon Grid background */
-    [data-testid="stAppViewContainer"]::before {
-        content: "";
-        position: fixed;
-        top: 0; left: 0; width: 100vw; height: 100vh;
-        background-image: 
-            linear-gradient(transparent 95%, rgba(0, 255, 255, 0.6) 95%),
-            linear-gradient(90deg, transparent 95%, rgba(0, 255, 255, 0.6) 95%);
-        background-size: 40px 40px;
-        z-index: -1;
-        pointer-events: none;
-        
-        /* Apply animations: moving grid + color shifting (RGB) */
-        animation: moveGrid 3s linear infinite, rgbShift 10s linear infinite;
+    /* 1. Force Streamlit's default backgrounds to be fully transparent */
+    [data-testid="stAppViewContainer"], 
+    [data-testid="stHeader"], 
+    .stApp {
+        background-color: transparent !important;
+        background: transparent !important;
     }
 
-    /* Move the grid downwards/rightwards continuously */
+    /* 2. Create the fixed background layer */
+    .neon-grid-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: -9999; /* Keeps it behind all app elements */
+        background-color: #020202; /* Deep black base */
+        
+        /* The Grid */
+        background-image: 
+            linear-gradient(transparent 95%, rgba(0, 255, 255, 0.9) 95%),
+            linear-gradient(90deg, transparent 95%, rgba(0, 255, 255, 0.9) 95%);
+        background-size: 50px 50px;
+        
+        /* Apply animations: Movement, RGB Color Shift, and Flickering */
+        animation: 
+            moveGrid 3s linear infinite, 
+            rgbShift 8s linear infinite, 
+            flicker 4s infinite;
+    }
+
+    /* 3. Animation Keyframes */
+    
+    /* Moves the grid diagonally forever */
     @keyframes moveGrid {
         0% { background-position: 0 0; }
-        100% { background-position: 40px 40px; }
+        100% { background-position: 50px 50px; }
     }
 
-    /* Rotate the hue to cycle through RGB colors */
+    /* Cycles through the RGB spectrum */
     @keyframes rgbShift {
-        0%   { filter: hue-rotate(0deg) drop-shadow(0 0 5px cyan); }
-        50%  { filter: hue-rotate(180deg) drop-shadow(0 0 15px magenta); }
-        100% { filter: hue-rotate(360deg) drop-shadow(0 0 5px cyan); }
+        0%   { filter: hue-rotate(0deg) drop-shadow(0 0 10px cyan); }
+        33%  { filter: hue-rotate(120deg) drop-shadow(0 0 10px magenta); }
+        66%  { filter: hue-rotate(240deg) drop-shadow(0 0 10px yellow); }
+        100% { filter: hue-rotate(360deg) drop-shadow(0 0 10px cyan); }
     }
 
-    /* Make containers and inputs semi-transparent to see the grid behind them */
+    /* Creates a random-looking electrical flicker */
+    @keyframes flicker {
+        0%, 100% { opacity: 1; }
+        10%, 12% { opacity: 0.8; }
+        13%, 49% { opacity: 1; }
+        50%, 52% { opacity: 0.4; }
+        53%, 79% { opacity: 1; }
+        80%      { opacity: 0.6; }
+        81%      { opacity: 1; }
+    }
+
+    /* 4. Style the Streamlit containers so they are readable over the wild background */
     [data-testid="stVerticalBlockBorderWrapper"] {
-        background: rgba(15, 15, 15, 0.75) !important;
+        background: rgba(10, 10, 10, 0.85) !important; /* Dark glassy look */
         backdrop-filter: blur(8px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
         border-radius: 12px;
-        transition: all 0.3s ease;
+        box-shadow: 0px 0px 20px rgba(0, 255, 255, 0.1);
     }
     
-    /* Subtle glow on hover for the containers */
-    [data-testid="stVerticalBlockBorderWrapper"]:hover {
-        box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
-    }
-    
-    /* Style headers and text to stand out against dark mode */
-    h1, h2, h3, p, label {
+    /* Ensure all text stays bright white for contrast */
+    h1, h2, h3, p, label, .st-emotion-cache-10trblm {
         color: #ffffff !important;
+        text-shadow: 0 0 4px rgba(255,255,255,0.4);
+    }
+    
+    /* Style the main button */
+    button[kind="primary"] {
+        background: linear-gradient(90deg, #ff00ff, #00ffff) !important;
+        border: none !important;
+        color: white !important;
+        font-weight: bold;
+        transition: transform 0.2s;
+    }
+    button[kind="primary"]:hover {
+        transform: scale(1.02);
     }
 </style>
 """
-st.markdown(neon_css, unsafe_allow_html=True)
+st.markdown(cyberpunk_bg, unsafe_allow_html=True)
 
 # --- Data Dictionaries from Projected Tables ---
 table_9s1 = {
@@ -85,7 +117,6 @@ table_9s1 = {
 }
 
 # PRECISE RECALIBRATION: 9S2 is "Slightly Tougher" than 9S1. 
-# Yields slightly better ranks than 9S1 for the same marks, removing the extreme "hopium" jumps.
 table_9s2 = {
     (130, 180): (1, 120),
     (120, 129): (120, 650),
@@ -116,19 +147,19 @@ def calculate_projected_rank(marks, shift, scenario):
     N = (max_m - min_m) + 1 
     base_pos = (marks - min_m) / N 
 
-    if "High Math" in scenario: # Best Case
+    if "High Math" in scenario: 
         bracket_position = base_pos + (1.0 / N)
         raw_val = stats.norm.cdf(bracket_position, loc=0.3, scale=0.2)
         v_min = stats.norm.cdf(0, loc=0.3, scale=0.2)
         v_max = stats.norm.cdf(1, loc=0.3, scale=0.2)
         
-    elif "Balanced" in scenario: # Moderate Case
+    elif "Balanced" in scenario: 
         bracket_position = base_pos + (0.5 / N)
         raw_val = stats.gamma.cdf(bracket_position, a=3, scale=0.2)
         v_min = stats.gamma.cdf(0, a=3, scale=0.2)
         v_max = stats.gamma.cdf(1, a=3, scale=0.2)
         
-    else: # Worst Case
+    else: 
         bracket_position = base_pos
         raw_val = stats.laplace.cdf(bracket_position, loc=0.7, scale=0.15)
         v_min = stats.laplace.cdf(0, loc=0.7, scale=0.15)
@@ -141,8 +172,8 @@ def calculate_projected_rank(marks, shift, scenario):
     return max(min_r, min(max_r, int(projected)))
 
 # --- UI Setup ---
-st.markdown("<h1 style='text-align: center; text-shadow: 0 0 10px rgba(255,255,255,0.5);'>🚀 COMEDK 2026 Engine</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #aaaaaa;'>Advanced Rank Projection based on 1.1 Lakh candidate datasets.</p>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;'>🚀 COMEDK 2026 Engine</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'>Advanced Rank Projection based on 1.1 Lakh candidate datasets.</p>", unsafe_allow_html=True)
 st.divider()
 
 # --- Input Module ---
@@ -157,7 +188,7 @@ with st.container(border=True):
         marks = st.number_input(f"Raw Score (Max 180):", min_value=0, max_value=180, value=90, step=1)
     
     # Mathematical contribution logic
-    shift_avg = 93.1 if "9S1" in shift else 91.5 # Adjusted 9S2 average to reflect the slight difficulty increase
+    shift_avg = 93.1 if "9S1" in shift else 91.5 
     deviation = round(marks - shift_avg, 1)
     
     st.markdown("<br>", unsafe_allow_html=True)
@@ -169,8 +200,7 @@ with st.container(border=True):
     scenario = st.select_slider(
         "Tie-Breaker Edge (Based on Subject Performance):",
         options=["Weak (Low Math)", "Moderate (Balanced)", "Strong (High Math)"],
-        value="Moderate (Balanced)",
-        help="COMEDK resolves ties using Mathematics score first, then Physics. Higher math scores push you to the top of your rank bracket."
+        value="Moderate (Balanced)"
     )
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -201,4 +231,4 @@ if st.button("Initialize Prediction ⚡", type="primary", use_container_width=Tr
             st.caption("⚖️ *Note: 9S2 brackets are normalized to reflect a slightly higher exam difficulty compared to 9S1.*")
 
 st.divider()
-st.markdown("<p style='text-align: center; font-size: 12px; color: #888888;'>Developed with Statistical Distribution | Advanced statistical tie-breaker modeling enabled</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; font-size: 12px;'>Developed with Statistical Distribution | Advanced statistical tie-breaker modeling enabled</p>", unsafe_allow_html=True)
