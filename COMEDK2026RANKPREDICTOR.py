@@ -198,9 +198,9 @@ with st.container(border=True):
 
     st.markdown("<br>", unsafe_allow_html=True)
     scenario = st.select_slider(
-        "Tie-Breaker Edge (Based on Subject Performance):",
-        options=["Weak (Low Math)", "Moderate (Balanced)", "Strong (High Math)"],
-        value="Moderate (Balanced)"
+        "CASE METER:",
+        options=["WORST CASE", "NORMAL CASE", "BEST CASE"],
+        value="NORMAL CASE"
     )
 
 st.markdown("<br>", unsafe_allow_html=True)
