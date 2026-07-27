@@ -10,7 +10,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- ROBUST CUSTOM CSS FOR NEON RGB FLICKERING GRID ---
+# --- ROBUST CUSTOM CSS FOR STATIC NEON GRID & SLOW RGB ---
 cyberpunk_bg = """
 <div class="neon-grid-bg"></div>
 
@@ -33,64 +33,43 @@ cyberpunk_bg = """
         z-index: -9999; /* Keeps it behind all app elements */
         background-color: #020202; /* Deep black base */
         
-        /* The Grid */
+        /* The Grid (Now Static) */
         background-image: 
-            linear-gradient(transparent 95%, rgba(0, 255, 255, 0.9) 95%),
-            linear-gradient(90deg, transparent 95%, rgba(0, 255, 255, 0.9) 95%);
+            linear-gradient(transparent 95%, rgba(0, 255, 255, 0.8) 95%),
+            linear-gradient(90deg, transparent 95%, rgba(0, 255, 255, 0.8) 95%);
         background-size: 50px 50px;
         
-        /* Apply animations: Movement, RGB Color Shift, and Flickering */
-        animation: 
-            moveGrid 3s linear infinite, 
-            rgbShift 8s linear infinite, 
-            flicker 4s infinite;
+        /* Apply slow RGB Color Shift only */
+        animation: rgbShift 20s linear infinite;
     }
 
     /* 3. Animation Keyframes */
     
-    /* Moves the grid diagonally forever */
-    @keyframes moveGrid {
-        0% { background-position: 0 0; }
-        100% { background-position: 50px 50px; }
-    }
-
-    /* Cycles through the RGB spectrum */
+    /* Cycles through the RGB spectrum slowly and smoothly */
     @keyframes rgbShift {
-        0%   { filter: hue-rotate(0deg) drop-shadow(0 0 10px cyan); }
-        33%  { filter: hue-rotate(120deg) drop-shadow(0 0 10px magenta); }
-        66%  { filter: hue-rotate(240deg) drop-shadow(0 0 10px yellow); }
-        100% { filter: hue-rotate(360deg) drop-shadow(0 0 10px cyan); }
+        0%   { filter: hue-rotate(0deg); }
+        33%  { filter: hue-rotate(120deg); }
+        66%  { filter: hue-rotate(240deg); }
+        100% { filter: hue-rotate(360deg); }
     }
 
-    /* Creates a random-looking electrical flicker */
-    @keyframes flicker {
-        0%, 100% { opacity: 1; }
-        10%, 12% { opacity: 0.8; }
-        13%, 49% { opacity: 1; }
-        50%, 52% { opacity: 0.4; }
-        53%, 79% { opacity: 1; }
-        80%      { opacity: 0.6; }
-        81%      { opacity: 1; }
-    }
-
-    /* 4. Style the Streamlit containers so they are readable over the wild background */
+    /* 4. Style the Streamlit containers so they are readable */
     [data-testid="stVerticalBlockBorderWrapper"] {
-        background: rgba(10, 10, 10, 0.85) !important; /* Dark glassy look */
-        backdrop-filter: blur(8px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        background: rgba(15, 15, 15, 0.85) !important; /* Dark glassy look */
+        backdrop-filter: blur(10px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
         border-radius: 12px;
-        box-shadow: 0px 0px 20px rgba(0, 255, 255, 0.1);
+        box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.5);
     }
     
     /* Ensure all text stays bright white for contrast */
     h1, h2, h3, p, label, .st-emotion-cache-10trblm {
         color: #ffffff !important;
-        text-shadow: 0 0 4px rgba(255,255,255,0.4);
     }
     
     /* Style the main button */
     button[kind="primary"] {
-        background: linear-gradient(90deg, #ff00ff, #00ffff) !important;
+        background: linear-gradient(90deg, #8a2be2, #00ffff) !important;
         border: none !important;
         color: white !important;
         font-weight: bold;
@@ -173,7 +152,7 @@ def calculate_projected_rank(marks, shift, scenario):
 
 # --- UI Setup ---
 st.markdown("<h1 style='text-align: center;'>🚀 COMEDK 2026 Engine</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center;'>Advanced Rank Projection based on 1.1 Lakh candidate datasets.</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #cccccc;'>Advanced Rank Projection based on 1.1 Lakh candidate datasets.</p>", unsafe_allow_html=True)
 st.divider()
 
 # --- Input Module ---
@@ -198,7 +177,7 @@ with st.container(border=True):
 
     st.markdown("<br>", unsafe_allow_html=True)
     scenario = st.select_slider(
-        "CASE METER:",
+        "Tie-Breaker Edge (Based on Subject Performance):",
         options=["WORST CASE", "NORMAL CASE", "BEST CASE"],
         value="NORMAL CASE"
     )
@@ -231,4 +210,4 @@ if st.button("Initialize Prediction ⚡", type="primary", use_container_width=Tr
             st.caption("⚖️ *Note: 9S2 brackets are normalized to reflect a slightly higher exam difficulty compared to 9S1.*")
 
 st.divider()
-st.markdown("<p style='text-align: center; font-size: 12px;'>Developed with Statistical Distribution | Advanced statistical tie-breaker modeling enabled</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; font-size: 12px; color: #aaaaaa;'>Developed with Statistical Distribution | Advanced statistical tie-breaker modeling enabled</p>", unsafe_allow_html=True)
