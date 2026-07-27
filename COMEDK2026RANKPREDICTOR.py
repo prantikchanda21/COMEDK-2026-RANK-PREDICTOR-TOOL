@@ -10,6 +10,67 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# --- Custom CSS for Neon Grid & RGB Lighting ---
+neon_css = """
+<style>
+    /* Darken the main app background */
+    [data-testid="stAppViewContainer"], .stApp {
+        background-color: #050505 !important;
+        color: #ffffff !important;
+    }
+    
+    /* Create the animated Neon Grid background */
+    [data-testid="stAppViewContainer"]::before {
+        content: "";
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        background-image: 
+            linear-gradient(transparent 95%, rgba(0, 255, 255, 0.6) 95%),
+            linear-gradient(90deg, transparent 95%, rgba(0, 255, 255, 0.6) 95%);
+        background-size: 40px 40px;
+        z-index: -1;
+        pointer-events: none;
+        
+        /* Apply animations: moving grid + color shifting (RGB) */
+        animation: moveGrid 3s linear infinite, rgbShift 10s linear infinite;
+    }
+
+    /* Move the grid downwards/rightwards continuously */
+    @keyframes moveGrid {
+        0% { background-position: 0 0; }
+        100% { background-position: 40px 40px; }
+    }
+
+    /* Rotate the hue to cycle through RGB colors */
+    @keyframes rgbShift {
+        0%   { filter: hue-rotate(0deg) drop-shadow(0 0 5px cyan); }
+        50%  { filter: hue-rotate(180deg) drop-shadow(0 0 15px magenta); }
+        100% { filter: hue-rotate(360deg) drop-shadow(0 0 5px cyan); }
+    }
+
+    /* Make containers and inputs semi-transparent to see the grid behind them */
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        background: rgba(15, 15, 15, 0.75) !important;
+        backdrop-filter: blur(8px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    /* Subtle glow on hover for the containers */
+    [data-testid="stVerticalBlockBorderWrapper"]:hover {
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+    }
+    
+    /* Style headers and text to stand out against dark mode */
+    h1, h2, h3, p, label {
+        color: #ffffff !important;
+    }
+</style>
+"""
+st.markdown(neon_css, unsafe_allow_html=True)
+
 # --- Data Dictionaries from Projected Tables ---
 table_9s1 = {
     (130, 180): (1, 150),  
@@ -80,8 +141,8 @@ def calculate_projected_rank(marks, shift, scenario):
     return max(min_r, min(max_r, int(projected)))
 
 # --- UI Setup ---
-st.markdown("<h1 style='text-align: center;'>🚀 COMEDK 2026 Engine</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: gray;'>Advanced Rank Projection based on 1.1 Lakh candidate datasets.</p>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; text-shadow: 0 0 10px rgba(255,255,255,0.5);'>🚀 COMEDK 2026 Engine</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #aaaaaa;'>Advanced Rank Projection based on 1.1 Lakh candidate datasets.</p>", unsafe_allow_html=True)
 st.divider()
 
 # --- Input Module ---
@@ -140,4 +201,4 @@ if st.button("Initialize Prediction ⚡", type="primary", use_container_width=Tr
             st.caption("⚖️ *Note: 9S2 brackets are normalized to reflect a slightly higher exam difficulty compared to 9S1.*")
 
 st.divider()
-st.markdown("<p style='text-align: center; font-size: 12px; color: gray;'>Developed with Statistical Distribution | Advanced statistical tie-breaker modeling enabled</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; font-size: 12px; color: #888888;'>Developed with Statistical Distribution | Advanced statistical tie-breaker modeling enabled</p>", unsafe_allow_html=True)
